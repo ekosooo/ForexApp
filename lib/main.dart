@@ -12,7 +12,7 @@ void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
   ));
-  runApp(MyApp());
+  runApp(ScreenCalendar());
 }
 
 class MyApp extends StatelessWidget {
@@ -36,6 +36,41 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class MenuPage extends StatefulWidget {
+  @override
+  MenuPageState createState() => MenuPageState();
+}
+
+class MenuPageState extends State<MenuPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Container(
+          height: 160.w,
+          padding: EdgeInsets.only(left: 25.w),
+          margin: EdgeInsets.only(
+            //left: 25.w,
+            top: 30.w,
+            bottom: 30.w,
+          ),
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: <Widget>[
+              _buildChildMenu(context, "calendar.png", "Calendar"),
+              _buildChildMenu(context, "education.png", "Education"),
+              _buildChildMenu(context, "robot.png", "EA Forex"),
+              _buildChildMenu(context, "analysis.png", "Analysis"),
+              _buildChildMenu(context, "indicator.png", "Indicator"),
+              _buildChildMenu(context, "tools.png", "Tools"),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -52,15 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            RaisedButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => ScreenCalendar()));
-              },
-              child: Text("pindah"),
-            ),
             CarouselSliderBuilder(),
-            _buildMenu(context),
+            MenuPage(),
             _buildMarketHours(),
             _buildNews(),
             _buildContentNews(),
@@ -232,35 +260,8 @@ class _BottomNavPageState extends State<BottomNavPage> {
   }
 }
 
-Widget _buildMenu(BuildContext context) {
-  return Column(
-    children: <Widget>[
-      Container(
-        height: 160.w,
-        padding: EdgeInsets.only(left: 25.w),
-        margin: EdgeInsets.only(
-          //left: 25.w,
-          top: 30.w,
-          bottom: 30.w,
-        ),
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: <Widget>[
-            _buildChildMenu(context, "calendar.png", "Calendar"),
-            _buildChildMenu(context, "education.png", "Education"),
-            _buildChildMenu(context, "robot.png", "EA Forex"),
-            _buildChildMenu(context, "analysis.png", "Analysis"),
-            _buildChildMenu(context, "indicator.png", "Indicator"),
-            _buildChildMenu(context, "tools.png", "Tools"),
-          ],
-        ),
-      ),
-    ],
-  );
-}
-
+@override
 Widget _buildChildMenu(BuildContext context, String icon, String label) {
-  BuildContext context;
   return Container(
     margin: EdgeInsets.only(right: 35.w),
     child: Column(
@@ -273,7 +274,6 @@ Widget _buildChildMenu(BuildContext context, String icon, String label) {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => ScreenCalendar()));
             }
-            print('ini $label');
           },
           child: Container(
             width: 100.w,
