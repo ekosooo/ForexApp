@@ -35,6 +35,10 @@ dependencies:
   bubble_bottom_bar: ^1.2.0
   #calendar_crousel
   flutter_calendar_carousel: ^1.4.12
+  #http
+  http: ^0.12.2
+  #timezone
+  flutter_native_timezone: ^1.0.4
 
 dev_dependencies:
   flutter_test:
