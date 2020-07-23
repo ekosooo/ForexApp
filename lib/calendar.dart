@@ -8,6 +8,8 @@ import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'model/calendarNews.dart';
 
+EventList<Event> _markedDateMap = EventList<Event>();
+
 class ScreenCalendar extends StatefulWidget {
   @override
   _ScreenCalendarState createState() => new _ScreenCalendarState();
@@ -55,25 +57,24 @@ class CalendarPageState extends State<CalendarPage> {
 
   CalendarNews calendarNews;
   List<CalendarNews> calendarFilter = [];
-
-  EventList<Event> _markedDateMap = EventList<Event>(
-    events: {
-      DateTime(2020, 07, 16): [
-        Event(
-          date: DateTime(2020, 07, 16),
-          title: "Event 1",
-          dot: Container(
-            margin: EdgeInsets.symmetric(horizontal: 1.w),
-            color: Colors.white,
-            height: 5.w,
-            width: 5.w,
-          ),
-        ),
-      ],
-    },
-  );
-
   CalendarCarousel _calendarCarouselNoHeader;
+
+  // EventList<Event> _markedDateMap = EventList<Event>(
+  //   events: {
+  //     DateTime(2020, 07, 16): [
+  //       Event(
+  //         date: DateTime(2020, 07, 16),
+  //         title: "Event 1",
+  //         dot: Container(
+  //           margin: EdgeInsets.symmetric(horizontal: 1.w),
+  //           color: Colors.white,
+  //           height: 5.w,
+  //           width: 5.w,
+  //         ),
+  //       ),
+  //     ],
+  //   },
+  // );
 
   @override
   initState() {
@@ -92,17 +93,6 @@ class CalendarPageState extends State<CalendarPage> {
     );
 
     calendarNews = CalendarNews();
-    var now = DateTime.now();
-    var timeNews = DateTime.parse("2020-07-19T09:26:00-0400");
-    var timezoneOffset = now.timeZoneOffset;
-    var testTime = timeNews.subtract(Duration(seconds: -7 * 3600));
-    //var newTime = DateTime((now.year, now.month, now.day) + 7);
-    var time = DateTime.parse("2020-07-19 10:15:00.000Z");
-    time = time.toLocal();
-    print("now $now");
-    print("time $timezoneOffset");
-    print("subtract $testTime");
-
     super.initState();
   }
 
@@ -162,29 +152,6 @@ class CalendarPageState extends State<CalendarPage> {
 
     //------------------
     return Scaffold(
-      // body: CustomScrollView(
-      //   slivers: <Widget>[
-      //     SliverAppBar(
-      //       pinned: true,
-      //       expandedHeight: 250.0,
-      //       flexibleSpace: FlexibleSpaceBar(
-      //         title: Text("Test"),
-      //       ),
-      //     ),
-      //     SliverFixedExtentList(
-      //       itemExtent: 50.0,
-      //       delegate: SliverChildBuilderDelegate(
-      //         (BuildContext context, int index) {
-      //           return Container(
-      //             alignment: Alignment.center,
-      //             color: Colors.lightBlue[100 * (index % 9)],
-      //             child: Text('List Item $index'),
-      //           );
-      //         },
-      //       ),
-      //     ),
-      //   ],
-      // ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(
@@ -286,6 +253,17 @@ Widget _buildListViewCalendar(List<CalendarNews> calendar) {
   //filter data berdasrkan tanggal
   List<CalendarNews> filterList =
       calendar.where((data) => data.date.contains("2020-07-19")).toList();
+//-----------------------------------------------------------------
+// ini logik untuk mendapatkan GMT time dari sistem. dengan mengambil timezone dari sistem
+// hasilnya misal lokasi WIB (7:00:00.00000) maka di ambil nilai sebelum titik dua pertama
+//------------------------------------------------------------------
+  var currentTime = DateTime.now();
+  var timeZone = currentTime.timeZoneOffset;
+  var end = ":";
+  final endIdx = timeZone.toString().indexOf(end);
+  var gmt = int.parse(timeZone.toString().substring(0, endIdx));
+//------------------------------------------------------------------
+
   return ListView.separated(
     shrinkWrap: true,
     primary: false,
@@ -296,14 +274,37 @@ Widget _buildListViewCalendar(List<CalendarNews> calendar) {
       indent: 0,
       endIndent: 0,
     ),
-    //itemCount: calendar.length,
     itemCount: calendar.length,
     itemBuilder: (context, index) {
-      //CalendarNews calendarNews = calendar[index];
-
       CalendarNews calendarNews = calendar[index];
-      String dateTime = calendarNews.date;
-      String time = dateTime.substring(11, 16);
+
+      //----- konversi timenews dari GMT -04.00 default forex Factory menjadi GMT 00.00
+      var dateTimeNewsFf = DateTime.parse(calendarNews.date);
+
+      //----- menambahkan durasi waktu tanggal sesuai gmt sistem
+      var dateTimeNewsConvert =
+          dateTimeNewsFf.add(Duration(seconds: (gmt) * 3600));
+
+      String dateNews = dateTimeNewsConvert.toString().substring(0, 10);
+      String timeNews = dateTimeNewsConvert.toString().substring(11, 16);
+
+      List<String> dateNewsSplit = dateNews.split("-");
+      print(dateNewsSplit[0]);
+
+      _markedDateMap.add(
+        DateTime(2020, 7, 19),
+        Event(
+          date: DateTime(2020, 7, 19),
+          title: "Event 1",
+          dot: Container(
+            margin: EdgeInsets.symmetric(horizontal: 1.w),
+            color: Colors.white,
+            height: 5.w,
+            width: 5.w,
+          ),
+        ),
+      );
+
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 25.w),
         child: Column(
@@ -339,7 +340,7 @@ Widget _buildListViewCalendar(List<CalendarNews> calendar) {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      calendarNews.date,
+                      dateNews + " " + timeNews,
                       style: TextStyle(
                         fontFamily: "PoppinsLight",
                         fontSize: 22.ssp,
