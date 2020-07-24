@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
+import '../DeffFunction.dart';
 import 'package:http/http.dart' as http;
 
 class CalendarNews {
   String title;
   String country;
-  String date;
+  DateTime date;
   String impact;
   String forecast;
   String previous;
@@ -23,7 +23,8 @@ class CalendarNews {
   factory CalendarNews.fromJson(Map<String, dynamic> json) => CalendarNews(
         title: json["title"],
         country: json["country"],
-        date: json["date"],
+        date: DateTime.parse(json["date"])
+            .add(Duration(seconds: (DefFunction().getGMTBySistem()) * 3600)),
         impact: json["impact"],
         forecast: json["forecast"],
         previous: json["previous"],
@@ -39,7 +40,6 @@ class CalendarNews {
     final String baseUrl =
         "https://cdn-nfs.faireconomy.media/ff_calendar_thisweek.json";
     final response = await http.get("$baseUrl");
-    print(response.statusCode);
     if (response.statusCode == 200) {
       return calendarFromJson(response.body);
     } else {
