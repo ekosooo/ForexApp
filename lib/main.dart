@@ -4,7 +4,14 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:flutter_calendar_carousel/classes/event.dart';
+import 'package:flutter_calendar_carousel/classes/event_list.dart';
+import 'model/calendarNews.dart';
+
 import 'calendar.dart';
+
+EventList<Event> _markedDateMap = EventList<Event>();
+List<String> arrImpact = ["Low", "Medium", "High"]; //impact news
 
 void main() {
   //transparent status bar
@@ -12,7 +19,8 @@ void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
   ));
-  runApp(ScreenCalendar());
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -77,6 +85,59 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+
+  //menambahakan markcalendar untuk page calendar.dart. mengambil data terlebih dahulu dari api. kemudian data tersebut di panggil di calenda.dart
+  void initState() {
+    var arrFlag = List.generate(31, (index) => List(3), growable: false);
+    for (int i = 0; i < 31; i++) {
+      for (int j = 0; j < 3; j++) {
+        arrFlag[i][j] = 0;
+      }
+    }
+
+    CalendarNews calendarNews = CalendarNews();
+    int tgl;
+    int bln;
+    int thn;
+
+    _markedDateMap.clear();
+    //List<String> dateNewsSplit;
+    calendarNews.getNews().then((value) {
+      for (var i = 0; i < value.length; i++) {
+        // String dateNews = value[i].date.toString().substring(0, 10);
+        // dateNewsSplit = dateNews.split("-");
+        thn = int.parse(value[i].date.toString().substring(0, 4));
+        bln = int.parse(value[i].date.toString().substring(5, 7));
+        tgl = int.parse(value[i].date.toString().substring(8, 10));
+
+        //thn = int.parse(value[i].date.toString().substring(0, 5));
+        int impactVal = getImpactVal(value[i].impact);
+        if (impactVal >= 0) {
+          arrFlag[tgl - 1][impactVal] = 1;
+        }
+      }
+
+      for (int i = 0; i < 31; i++) {
+        int counter = 0;
+        String strImpact = "";
+        for (var j = 0; j < 3; j++) {
+          if (arrFlag[i][j] == 1) {
+            counter++;
+            //strImpact += j.toString() + " ";
+            int day = i + 1;
+            //print("tgl $tgl");
+            //print("tgl $i bln $bln thn $thn impact $j");
+            addMarkCalendar(thn, bln, day, j);
+          }
+        }
+        //counter akan memberikan informasi ada berapa jenis impact
+      }
+    });
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     //ScreenUtil.init(width: 720, height: 1280, allowFontScaling: false);
@@ -620,4 +681,48 @@ class HexColor extends Color {
   }
 
   HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
+}
+
+getMarkCalendar() {
+  return _markedDateMap;
+}
+
+addMarkCalendar(int thn, int bln, int tgl, var impact) {
+  Color colorImpact;
+  if (impact == 2) {
+    //impact high
+    //2 impact high
+    colorImpact = Colors.red;
+  } else if (impact == 1) {
+    //impact medium
+    //1 impact medium
+    colorImpact = Colors.orange;
+  } else if (impact == 0) {
+    //impact low
+    //0 impact low
+    colorImpact = Colors.white;
+  }
+  _markedDateMap.add(
+    DateTime(thn, bln, tgl),
+    Event(
+      date: DateTime(thn, bln, tgl),
+      dot: Container(
+        margin: EdgeInsets.symmetric(horizontal: 1.w),
+        color: colorImpact,
+        height: 5.w,
+        width: 5.w,
+      ),
+    ),
+  );
+}
+
+int getImpactVal(String impact) {
+  int val = -1;
+  for (var i = 0; i < arrImpact.length; i++) {
+    if (impact == arrImpact[i]) {
+      val = i;
+      break;
+    }
+  }
+  return val;
 }
