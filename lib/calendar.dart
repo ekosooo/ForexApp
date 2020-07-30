@@ -8,160 +8,16 @@ import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'model/calendarNews.dart';
 import 'main.dart' as main;
-import 'colorCustom.dart';
+import 'customColor.dart';
 
 //EventList<Event> _markedDateMap = EventList<Event>();
 //CalendarCarousel _calendarCarouselNoHeader;
 CalendarCarousel<Event> _calendarCarouselNoHeader = CalendarCarousel<Event>();
-bool _checkHigh = false;
-bool _checkMedium = false;
-bool _checkLow = false;
+bool _isHigh = true;
+bool _isMedium = true;
+bool _isLow = true;
 
-class ScreenCalendar extends StatefulWidget {
-  @override
-  _ScreenCalendarState createState() => new _ScreenCalendarState();
-}
-
-class _ScreenCalendarState extends State<ScreenCalendar> {
-  void _showDialog() {
-    showDialog(
-        context: this.context,
-        builder: (BuildContext context) {
-          return StatefulBuilder(builder: (context, setState) {
-            return AlertDialog(
-              title: Text("Filter News"),
-              content: Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        //----------- high
-                        Checkbox(
-                          activeColor: ColorCustom.primary,
-                          value: _checkHigh,
-                          onChanged: (bool response) {
-                            setState(() {
-                              _checkHigh = response;
-                              print("High $_checkHigh");
-                            });
-                          },
-                        ),
-                        Text(
-                          "High",
-                          style: TextStyle(
-                            fontFamily: "Poppins",
-                            fontSize: 25.ssp,
-                          ),
-                        ),
-
-                        //--------- medium
-                        Checkbox(
-                          activeColor: ColorCustom.primary,
-                          value: _checkMedium,
-                          onChanged: (bool response) {
-                            setState(() {
-                              _checkMedium = response;
-                              print("Medium $_checkMedium");
-                            });
-                          },
-                        ),
-                        Text(
-                          "Medium",
-                          style: TextStyle(
-                            fontFamily: "Poppins",
-                            fontSize: 25.ssp,
-                          ),
-                        ),
-
-                        //--------- low
-                        Checkbox(
-                          activeColor: ColorCustom.primary,
-                          value: _checkLow,
-                          onChanged: (bool response) {
-                            setState(() {
-                              _checkLow = response;
-                              print("Low $_checkLow");
-                            });
-                          },
-                        ),
-                        Text(
-                          "Low",
-                          style: TextStyle(
-                            fontFamily: "Poppins",
-                            fontSize: 25.ssp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text(
-                    "OK",
-                    style: TextStyle(
-                      fontFamily: "PoppinsSemiBold",
-                      fontSize: 20.ssp,
-                      color: ColorCustom.primary,
-                    ),
-                  ),
-                  onPressed: () {
-                    print("High $_checkHigh");
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            );
-          });
-        });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    ScreenUtil.init(width: 750, height: 1334);
-    return MaterialApp(
-      theme: ThemeData(
-        appBarTheme: AppBarTheme(color: Color.fromRGBO(0, 147, 123, 1)),
-      ),
-      home: Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios),
-              color: Colors.white,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            title: Text(
-              "Calendar Economic",
-              style: TextStyle(
-                fontFamily: "PoppinsMedium",
-                fontSize: 30.ssp,
-              ),
-            ),
-            elevation: 0.0,
-            actions: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(right: 25.w),
-                child: GestureDetector(
-                  onTap: () {
-                    _showDialog();
-                  },
-                  child: Icon(
-                    Icons.filter_list,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          body: CalendarPage()),
-    );
-  }
-}
+Future<List> futureCalendar;
 
 class CalendarPage extends StatefulWidget {
   @override
@@ -178,44 +34,20 @@ class CalendarPageState extends State<CalendarPage> {
   bool flagEventToday = true;
   DateTime dateSelectedEvent;
 
-  @override
-  initState() {
-    // calendarNews = CalendarNews();
-
-    // calendarNews.getNews().then((value) {
-    //   for (var i = 0; i < value.length; i++) {
-    //     String dateNews = value[i].date.toString().substring(0, 10);
-    //     print(dateNews);
-    //     List<String> dateNewsSplit = dateNews.split("-");
-    //     //print(dateNewsSplit[0]);
-
-    //     _markedDateMap.add(
-    //       DateTime(int.parse(dateNewsSplit[0]), int.parse(dateNewsSplit[1]),
-    //           int.parse(dateNewsSplit[2])),
-    //       Event(
-    //         date: DateTime(int.parse(dateNewsSplit[0]),
-    //             int.parse(dateNewsSplit[1]), int.parse(dateNewsSplit[2])),
-    //         title: calendarNews.title,
-    //         dot: Container(
-    //           margin: EdgeInsets.symmetric(horizontal: 1.w),
-    //           color: Colors.white,
-    //           height: 5.w,
-    //           width: 5.w,
-    //         ),
-    //       ),
-    //     );
-    //   }
-    // });
-
-    super.initState();
-  }
-
   void refresh(DateTime date) {
     _currentDate = date;
   }
 
   @override
+  void initState() {
+    futureCalendar = calendarNews.getNews();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ScreenUtil.init(width: 750, height: 1334);
+
     /// Example Calendar Carousel without header and custom prev & next button
     _calendarCarouselNoHeader = CalendarCarousel<Event>(
       todayBorderColor: Colors.white,
@@ -223,7 +55,6 @@ class CalendarPageState extends State<CalendarPage> {
         this.setState(() => refresh(date));
         flagEventToday = false;
         dateSelectedEvent = date;
-        print(date);
       },
       daysHaveCircularBorder: null,
       showOnlyCurrentMonthDate: false,
@@ -264,6 +95,7 @@ class CalendarPageState extends State<CalendarPage> {
       selectedDayButtonColor: Color.fromRGBO(8, 8, 8, 0.2),
       onCalendarChanged: (DateTime date) {
         this.setState(() {
+          //print(date);
           _targetDateTime = date;
           _currentMonth = DateFormat.yMMMM().format(_targetDateTime);
         });
@@ -274,111 +106,193 @@ class CalendarPageState extends State<CalendarPage> {
     );
 
     //------------------
-    return Scaffold(
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            //---------------------header calendar
-            // Container(
-            //   color: Color.fromRGBO(0, 147, 123, 1),
-            //   padding: EdgeInsets.only(
-            //       top: 16.w, bottom: 10.w, left: 40.w, right: 16.w),
-            //   child: Row(
-            //     children: <Widget>[
-            //       Expanded(
-            //         child: Text(
-            //           _currentMonth,
-            //           style: TextStyle(
-            //               fontWeight: FontWeight.bold,
-            //               fontSize: 40.ssp,
-            //               color: Colors.white),
-            //         ),
-            //       ),
-            //       FlatButton(
-            //         onPressed: () {
-            //           setState(() {
-            //             _targetDateTime = DateTime(
-            //                 _targetDateTime.year, _targetDateTime.month - 1);
-            //             _currentMonth =
-            //                 DateFormat.yMMMM().format(_targetDateTime);
-            //             print("PREV " + _currentMonth);
-            //           });
-            //         },
-            //         child: Text(
-            //           "PREV",
-            //           style: TextStyle(color: Colors.white),
-            //         ),
-            //       ),
-            //       FlatButton(
-            //         onPressed: () {
-            //           setState(() {
-            //             _targetDateTime = DateTime(
-            //                 _targetDateTime.year, _targetDateTime.month + 1);
-            //             _currentMonth =
-            //                 DateFormat.yMMMM().format(_targetDateTime);
-            //           });
-            //           print("NEXT " + _currentMonth);
-            //         },
-            //         child: Text(
-            //           "NEXT",
-            //           style: TextStyle(color: Colors.white),
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
-
-            //--------------------calendar
-            Container(
-              child: _calendarCarouselNoHeader,
-              margin: EdgeInsets.only(bottom: 10.w),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(40.w),
-                  bottomRight: Radius.circular(40.w),
+    return MaterialApp(
+      theme: ThemeData(
+        appBarTheme: AppBarTheme(color: Color.fromRGBO(0, 147, 123, 1)),
+        primarySwatch: Colors.teal,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios),
+              color: Colors.white,
+              onPressed: () {
+                Navigator.of(context).pop();
+                _isHigh = true;
+                _isMedium = true;
+                _isLow = true;
+              }),
+          title: Text(
+            "Calendar Economic",
+            style: TextStyle(
+              fontFamily: "PoppinsMedium",
+              fontSize: 30.ssp,
+            ),
+          ),
+          elevation: 0.0,
+        ),
+        body: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              //--------------------calendar
+              Container(
+                child: _calendarCarouselNoHeader,
+                margin: EdgeInsets.only(bottom: 10.w),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(40.w),
+                    bottomRight: Radius.circular(40.w),
+                  ),
+                  color: Color.fromRGBO(0, 147, 123, 1),
+                  //color: Colors.black,
                 ),
-                color: Color.fromRGBO(0, 147, 123, 1),
-                //color: Colors.black,
               ),
-            ),
 
-            //-------------- list detail news
-            Padding(padding: EdgeInsets.only(top: 20.w)),
-            Wrap(
-              children: <Widget>[
-                //_featureBuild(),
-                FutureBuilder(
-                  future: calendarNews.getNews(),
-                  builder: (BuildContext mcontext,
-                      AsyncSnapshot<List<CalendarNews>> snapshot) {
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text("Something wrong with message"),
-                      );
-                    } else if (snapshot.connectionState ==
-                        ConnectionState.done) {
-                      List<CalendarNews> calendarData = snapshot.data;
-                      if (flagEventToday) {
-                        return _buildListViewCalendar(
-                            calendarData, DateTime.now());
-                      } else {
-                        return _buildListViewCalendar(
-                            calendarData, dateSelectedEvent);
-                      }
-                    } else {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  },
+              Container(
+                margin: EdgeInsets.only(left: 25.w, right: 25.w),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    //-------------- Tombol High
+                    Expanded(
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10.w),
+                        child: RaisedButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.w)),
+                          color: (_isHigh)
+                              ? CustomColor.primary
+                              : Color.fromRGBO(230, 229, 235, 1),
+                          elevation: 0.0,
+                          child: Text(
+                            "High",
+                            style: TextStyle(
+                              fontFamily: "PoppinsMedium",
+                              fontSize: 22.ssp,
+                              color: (_isHigh) ? Colors.white : Colors.black54,
+                            ),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (_isHigh) {
+                                _isHigh = false;
+                              } else {
+                                _isHigh = true;
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+
+                    //------------------ tombol Medium
+                    Expanded(
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10.w),
+                        child: RaisedButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.w)),
+                          color: (_isMedium)
+                              ? CustomColor.primary
+                              : Color.fromRGBO(230, 229, 235, 1),
+                          elevation: 0.0,
+                          child: Text(
+                            "Medium",
+                            style: TextStyle(
+                              fontFamily: "PoppinsMedium",
+                              fontSize: 22.ssp,
+                              color:
+                                  (_isMedium) ? Colors.white : Colors.black54,
+                            ),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (_isMedium) {
+                                _isMedium = false;
+                              } else {
+                                _isMedium = true;
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+
+                    //------------------ tombol low
+                    Expanded(
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10.w),
+                        child: RaisedButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.w)),
+                          color: (_isLow)
+                              ? CustomColor.primary
+                              : Color.fromRGBO(230, 229, 235, 1),
+                          elevation: 0.0,
+                          child: Text(
+                            "Low",
+                            style: TextStyle(
+                              fontFamily: "PoppinsMedium",
+                              fontSize: 22.ssp,
+                              color: (_isLow) ? Colors.white : Colors.black54,
+                            ),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (_isLow) {
+                                _isLow = false;
+                              } else {
+                                _isLow = true;
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
 
-            Padding(padding: EdgeInsets.only(bottom: 30.w)),
-          ],
+              //-------------- list detail news
+              Padding(padding: EdgeInsets.only(top: 20.w)),
+              Wrap(
+                children: <Widget>[
+                  //_featureBuild(),
+                  FutureBuilder<List>(
+                    //future: calendarNews.getNews(),
+                    future: futureCalendar,
+                    builder:
+                        (BuildContext mcontext, AsyncSnapshot<List> snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text("Something wrong with message"),
+                        );
+                      } else if (snapshot.connectionState ==
+                          ConnectionState.done) {
+                        List<CalendarNews> calendarData = snapshot.data;
+                        if (flagEventToday) {
+                          return _buildListViewCalendar(
+                              calendarData, DateTime.now());
+                        } else {
+                          return _buildListViewCalendar(
+                              calendarData, dateSelectedEvent);
+                        }
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+
+              Padding(padding: EdgeInsets.only(bottom: 30.w)),
+            ],
+          ),
         ),
       ),
     );
@@ -387,11 +301,16 @@ class CalendarPageState extends State<CalendarPage> {
 
 Widget _buildListViewCalendar(
     List<CalendarNews> calendar, DateTime dateSelected) {
+  List<CalendarNews> filterList = [];
   //filter data berdasrkan tanggal
   String dateSelectedStr = dateSelected.toString().substring(0, 10);
 
-  List<CalendarNews> filterList = calendar
-      .where((data) => data.date.toString().contains(dateSelectedStr))
+  filterList = calendar
+      .where((data) =>
+          data.date.toString().contains(dateSelectedStr) &&
+          ((data.impact.contains("High") && _isHigh == true) ||
+              (data.impact.contains("Medium") && _isMedium == true) ||
+              (data.impact.contains("Low") && _isLow == true)))
       .toList();
 
   //_markedDateMap.clear();

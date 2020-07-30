@@ -7,8 +7,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'model/calendarNews.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'calendar.dart';
+import 'education.dart';
 
 EventList<Event> _markedDateMap = EventList<Event>();
 List<String> arrImpact = ["Low", "Medium", "High"]; //impact news
@@ -20,7 +22,7 @@ void main() {
     statusBarColor: Colors.transparent,
   ));
 
-  runApp(MyApp());
+  runApp(EducationPage());
 }
 
 class MyApp extends StatelessWidget {
@@ -30,7 +32,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.teal,
         //primarySwatch: Color.fromRGBO(0, 147, 123, 1),
         // This makes the visual density adapt to the platform that you run
         // the app on. For desktop platforms, the controls will be smaller and
@@ -101,20 +103,23 @@ class _MyHomePageState extends State<MyHomePage> {
     int bln;
     int thn;
 
+    List<int> listbln = [];
+
     _markedDateMap.clear();
     //List<String> dateNewsSplit;
     calendarNews.getNews().then((value) {
       for (var i = 0; i < value.length; i++) {
         // String dateNews = value[i].date.toString().substring(0, 10);
         // dateNewsSplit = dateNews.split("-");
-        thn = int.parse(value[i].date.toString().substring(0, 4));
-        bln = int.parse(value[i].date.toString().substring(5, 7));
         tgl = int.parse(value[i].date.toString().substring(8, 10));
 
         //thn = int.parse(value[i].date.toString().substring(0, 5));
         int impactVal = getImpactVal(value[i].impact);
         if (impactVal >= 0) {
           arrFlag[tgl - 1][impactVal] = 1;
+          thn = int.parse(value[i].date.toString().substring(0, 4));
+          bln = int.parse(value[i].date.toString().substring(5, 7));
+          //listbln.add(bln);
         }
       }
 
@@ -133,6 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         //counter akan memberikan informasi ada berapa jenis impact
       }
+      //print(listbln.toString());
     });
 
     super.initState();
@@ -333,7 +339,7 @@ Widget _buildChildMenu(BuildContext context, String icon, String label) {
           onTap: () {
             if (label == "Calendar") {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => ScreenCalendar()));
+                  CupertinoPageRoute(builder: (context) => CalendarPage()));
             }
           },
           child: Container(
@@ -373,7 +379,7 @@ Widget _buildChildMenu(BuildContext context, String icon, String label) {
   );
 }
 
-Container _buildContentdMarketHours(String market, String open, String close) {
+Container _buildContentMarketHours(String market, String open, String close) {
   return Container(
     padding: EdgeInsets.all(10.w),
     margin: EdgeInsets.only(right: 16.w),
@@ -496,10 +502,10 @@ Container _buildMarketHours() {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: <Widget>[
-              _buildContentdMarketHours("Sydney", "05.00 WIB", "14.00 WIB"),
-              _buildContentdMarketHours("Tokyo", "07.00 WIB", "16.00 WIB"),
-              _buildContentdMarketHours("London", "01.00 WIB", "10.00 WIB"),
-              _buildContentdMarketHours("New York", "20.00 WIB", "05.00 WIB"),
+              _buildContentMarketHours("Sydney", "05.00 WIB", "14.00 WIB"),
+              _buildContentMarketHours("Tokyo", "07.00 WIB", "16.00 WIB"),
+              _buildContentMarketHours("London", "01.00 WIB", "10.00 WIB"),
+              _buildContentMarketHours("New York", "20.00 WIB", "05.00 WIB"),
             ],
           ),
         ),
